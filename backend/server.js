@@ -1,11 +1,23 @@
-const express = require('express');
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import connectDB from './Config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import employeeRoutes from './routes/employeeRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import shiftRoutes from './routes/shiftRoutes.js';
 
-const app = express();  
+dotenv.config();
+connectDB();
 
-app.get('/', (req, res) => {    
-    res.send('Hello World!');  
-});
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-app.listen(3000, () => {    
-    console.log('Server is running on http://localhost:3000');  
-});
+app.use('/api/auth', authRoutes);
+app.use('/api/employee', employeeRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/shifts', shiftRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
