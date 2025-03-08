@@ -15,5 +15,6 @@ const AvailabilitySchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const Availability = mongoose.model('Availability', AvailabilitySchema);
+const Availability = mongoose.models.Availability || mongoose.model('Availability', AvailabilitySchema);
+
 export default Availability;

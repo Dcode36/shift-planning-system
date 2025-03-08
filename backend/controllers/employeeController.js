@@ -1,6 +1,6 @@
-import Availability from '../Models/Availability.js';
+import Availability from '../models/Availability.js';
 import moment from 'moment-timezone';
-
+import User from "../models/User.js";
 
 export const createAvailability = async (req, res) => {
     try {
@@ -76,6 +76,47 @@ export const getAvailabilities = async (req, res) => {
         res.status(200).json(availabilities);
     } catch (error) {
         console.error('Error fetching availabilities:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getAvailableEmployees = async (req, res) => {
+    try {
+        const { date, startTime, endTime, timeZone } = req.query;
+
+        if (!date || !startTime || !endTime || !timeZone) {
+            return res.status(400).json({ message: "Please provide date, startTime, endTime, and timeZone." });
+        }
+
+        // Convert input times to UTC for uniform comparison
+        const startUTC = moment.tz(`${date} ${startTime}`, "YYYY-MM-DD hh:mm A", timeZone).utc().format("HH:mm");
+        const endUTC = moment.tz(`${date} ${endTime}`, "YYYY-MM-DD hh:mm A", timeZone).utc().format("HH:mm");
+
+        // Find employees with availability on the given date & within the time range
+        const employees = await Availability.find({
+            "availability": {
+                $elemMatch: {
+                    date,
+                    startTime: { $lte: endUTC },  // Start time should be <= requested end
+                    endTime: { $gte: startUTC }   // End time should be >= requested start
+                }
+            }
+        }).select("employeeId");
+
+        if (!employees.length) {
+            return res.status(200).json({ message: "No employees available in the given time range." });
+        }
+
+        // Extract unique employeeIds
+        const employeeIds = employees.map(emp => emp.employeeId);
+
+        // Fetch employee names and IDs from User collection
+        const employeeDetails = await User.find({ _id: { $in: employeeIds } }).select("name _id");
+
+        res.status(200).json(employeeDetails);
+    } catch (error) {
+        console.error("Error fetching available employees:", error);
         res.status(500).json({ message: error.message });
     }
 };

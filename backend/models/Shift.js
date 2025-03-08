@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 const shiftSchema = new mongoose.Schema({
-    assignedEmployee: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    shiftTime: { type: Date, required: true },
-    duration: { type: Number, required: true },
+    assignedEmployee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    date: { type: String, required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
     timeZone: { type: String, required: true },
 }, { timestamps: true });
 
