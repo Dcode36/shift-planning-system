@@ -1,4 +1,4 @@
-import Shift from '../Models/Shift.js';
+import Shift from '../models/Shift.js';
 import Availability from '../models/Availability.js';
 import { convertShiftTime } from '../utils/timeZoneConverter.js';
 import User from '../models/User.js';

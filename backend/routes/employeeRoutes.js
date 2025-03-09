@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAvailability, getAvailabilities, getAvailableEmployees, getAssignedShifts } from '../Controllers/employeeController.js';
+import { createAvailability, getAvailabilities, getAvailableEmployees, getAssignedShifts } from '../controllers/employeeController.js';
 import { authMiddleware, isAdmin, isEmployee } from '../middleware/authMiddleware.js';
 
 const router = express.Router();

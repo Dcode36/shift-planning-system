@@ -1,4 +1,4 @@
-import Shift from '../models/shift.js';
+import Shift from '../models/Shift.js';
 import moment from 'moment-timezone';
 import User from '../models/User.js';
 
