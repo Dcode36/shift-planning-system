@@ -1,7 +1,7 @@
 import Availability from '../models/Availability.js';
 import moment from 'moment-timezone';
 import User from "../models/User.js";
-import Shift from '../Models/Shift.js';
+import Shift from '../models/Shift.js';
 export const createAvailability = async (req, res) => {
     try {
         const { date, timeZone, startTime, endTime } = req.body;
