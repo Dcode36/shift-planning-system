@@ -1,7 +1,7 @@
 import Availability from '../models/Availability.js';
 import moment from 'moment-timezone';
 import User from "../models/User.js";
-
+import Shift from '../Models/Shift.js';
 export const createAvailability = async (req, res) => {
     try {
         const { date, timeZone, startTime, endTime } = req.body;
@@ -85,24 +85,21 @@ export const getAvailableEmployees = async (req, res) => {
     try {
         const { date, startTime, endTime, timeZone } = req.query;
 
+        console.log(date, startTime, endTime, timeZone);
         if (!date || !startTime || !endTime || !timeZone) {
             return res.status(400).json({ message: "Please provide date, startTime, endTime, and timeZone." });
         }
 
-        // Convert input times to UTC for uniform comparison
-        const startUTC = moment.tz(`${date} ${startTime}`, "YYYY-MM-DD hh:mm A", timeZone).utc().format("HH:mm");
-        const endUTC = moment.tz(`${date} ${endTime}`, "YYYY-MM-DD hh:mm A", timeZone).utc().format("HH:mm");
-
-        // Find employees with availability on the given date & within the time range
         const employees = await Availability.find({
             "availability": {
                 $elemMatch: {
                     date,
-                    startTime: { $lte: endUTC },  // Start time should be <= requested end
-                    endTime: { $gte: startUTC }   // End time should be >= requested start
+                    startTime: { $lte: startTime },  // Shift can start before or at the given startTime
+                    endTime: { $gte: endTime }       // Shift can end after or at the given endTime
                 }
             }
         }).select("employeeId");
+
 
         if (!employees.length) {
             return res.status(200).json({ message: "No employees available in the given time range." });
@@ -117,6 +114,29 @@ export const getAvailableEmployees = async (req, res) => {
         res.status(200).json(employeeDetails);
     } catch (error) {
         console.error("Error fetching available employees:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getAssignedShifts = async (req, res) => {
+    try {
+        // Ensure the user is authenticated
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const { id } = req.params; // Get assignedEmployee ID from params
+
+        if (!id) {
+            return res.status(400).json({ message: "Employee ID is required" });
+        }
+
+        const shifts = await Shift.find({ assignedEmployee: id });
+
+        res.status(200).json(shifts);
+    } catch (error) {
+        console.error("Error fetching assigned shifts:", error);
         res.status(500).json({ message: error.message });
     }
 };

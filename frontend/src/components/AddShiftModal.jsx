@@ -1,26 +1,29 @@
-import { useState } from 'react';
-import { Modal, Box, Typography, Button, TextField, MenuItem, Select } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Modal, Box, Typography, Button, TextField, MenuItem, Select, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import axios from 'axios';
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
-const AddNewShiftModal = ({ user }) => {
+const AddNewShiftModal = () => {
     const [open, setOpen] = useState(false);
+    const user = JSON.parse(localStorage.getItem('user'));
     const [shiftData, setShiftData] = useState({
         date: '',
         startTime: null,
         endTime: null,
-        timeZone: '',
+        timeZone: user.timeZone, // Default to user's time zone
         assignedEmployee: ''
     });
     const [availableEmployees, setAvailableEmployees] = useState([]);
-    const [isFetching, setIsFetching] = useState(false);
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
-        setShiftData({ date: '', startTime: null, endTime: null, timeZone: '', assignedEmployee: '' });
+        setShiftData({ date: '', startTime: null, endTime: null, timeZone: user.timeZone, assignedEmployee: '' });
         setAvailableEmployees([]);
         setOpen(false);
     };
@@ -31,53 +34,48 @@ const AddNewShiftModal = ({ user }) => {
     };
 
     const handleTimeChange = (name, time) => {
-        setShiftData((prev) => ({ ...prev, [name]: time }));
+        if (!time) return;
+        const formattedTime = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        setShiftData((prev) => ({ ...prev, [name]: formattedTime }));
     };
 
-    const fetchAvailableEmployees = async () => {
-        if (!shiftData.date || !shiftData.startTime || !shiftData.endTime || !shiftData.timeZone) {
-            return alert("Please select date, start time, end time, and time zone first.");
+    // Automatically fetch available employees when all required fields are filled
+    useEffect(() => {
+        if (shiftData.date && shiftData.startTime && shiftData.endTime) {
+            fetchAvailableEmployees();
         }
+    }, [shiftData.date, shiftData.startTime, shiftData.endTime]);
 
-        setIsFetching(true);
+    const fetchAvailableEmployees = async () => {
+
         try {
             const token = localStorage.getItem('token');
             const { data } = await axios.get(`http://localhost:4000/api/employee/get-available-employees`, {
-                params: {
-                    date: shiftData.date,
-                    startTime: shiftData.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-                    endTime: shiftData.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-                    timeZone: shiftData.timeZone
-                },
+                params: shiftData,
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             setAvailableEmployees(data);
         } catch (error) {
-            console.error("Error fetching available employees:", error);
-        } finally {
-            setIsFetching(false);
+            console.error("Error fetching employees:", error);
         }
     };
 
     const handleSubmit = async () => {
         try {
-            if (!shiftData.date || !shiftData.startTime || !shiftData.endTime || !shiftData.timeZone) {
+            if (!shiftData.date || !shiftData.startTime || !shiftData.endTime) {
                 return alert("Please fill all fields before submitting.");
             }
             const token = localStorage.getItem('token');
 
-            const res = await axios.post(`http://localhost:4000/api/admin/create-shift`, {
-                ...shiftData,
-                startTime: shiftData.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-                endTime: shiftData.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            }, {
+            const res = await axios.post(`http://localhost:4000/api/admin/create-shift`, shiftData, {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
+
             if (res.status === 201) {
                 alert("Shift created successfully");
                 handleClose();
+                window.location.reload();
             }
-            console.log(res.data);
         } catch (error) {
             console.error("Error creating shift:", error);
         }
@@ -96,104 +94,99 @@ const AddNewShiftModal = ({ user }) => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        width: 400,
+                        width: 450,
                         bgcolor: 'background.paper',
                         boxShadow: 24,
                         p: 4,
-                        borderRadius: 2
+                        borderRadius: 2,
+                        textAlign: 'center'
                     }}
                 >
-                    <Typography id="add-new-shift" variant="h6" component="h2">
+                    <Typography variant="h5" fontWeight="bold" gutterBottom>
                         Add New Shift
                     </Typography>
 
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        {/* Step 1: Select Date */}
-                        <TextField
-                            fullWidth
-                            label="Date"
-                            type="date"
-                            name="date"
-                            value={shiftData.date}
-                            onChange={handleChange}
-                            margin="normal"
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        <Grid container spacing={2}>
+                            {/* Date Picker */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Date"
+                                    type="date"
+                                    name="date"
+                                    value={shiftData.date}
+                                    onChange={handleChange}
+                                    margin="normal"
+                                    InputLabelProps={{ shrink: true }}
+                                    InputProps={{
+                                        startAdornment: <CalendarTodayIcon sx={{ mr: 1 }} />
+                                    }}
+                                />
+                            </Grid>
 
-                        {/* Step 2: Select Start Time */}
-                        <MobileTimePicker
-                            label="Start Time"
-                            value={shiftData.startTime}
-                            onChange={(time) => handleTimeChange('startTime', time)}
-                            renderInput={(params) => <TextField {...params} fullWidth margin="normal"
-                            />}
-                            sx={{ width: '100%', mt: 1 }}
-                        />
+                            {/* Start Time Picker */}
+                            <Grid item xs={6}>
+                                <MobileTimePicker
+                                    label="Start Time"
+                                    value={shiftData.startTime ? new Date(`${shiftData.date} ${shiftData.startTime}`) : null}
+                                    onChange={(time) => handleTimeChange('startTime', time)}
+                                    renderInput={(params) => (
+                                        <TextField {...params} fullWidth margin="normal"
+                                            InputProps={{
+                                                startAdornment: <AccessTimeIcon sx={{ mr: 1 }} />
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
 
-                        {/* Step 3: Select End Time */}
-                        <MobileTimePicker
-                            label="End Time"
-                            value={shiftData.endTime}
-                            onChange={(time) => handleTimeChange('endTime', time)}
-                            renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
-                            sx={{ width: '100%', mt: 2 }}
-                        />
+                            {/* End Time Picker */}
+                            <Grid item xs={6}>
+                                <MobileTimePicker
+                                    label="End Time"
+                                    value={shiftData.endTime ? new Date(`${shiftData.date} ${shiftData.endTime}`) : null}
+                                    onChange={(time) => handleTimeChange('endTime', time)}
+                                    renderInput={(params) => (
+                                        <TextField {...params} fullWidth margin="normal"
+                                            InputProps={{
+                                                startAdornment: <AccessTimeIcon sx={{ mr: 1 }} />
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
+
+                            {/* Employee Selection */}
+                            {availableEmployees.length > 0 && (
+                                <Grid item xs={12}>
+                                    <Select
+                                        fullWidth
+                                        name="assignedEmployee"
+                                        value={shiftData.assignedEmployee}
+                                        onChange={handleChange}
+                                        displayEmpty
+                                        sx={{ mt: 2 }}
+                                    >
+                                        <MenuItem value="" disabled>Select an Employee</MenuItem>
+                                        {availableEmployees.map((employee) => (
+                                            <MenuItem key={employee._id} value={employee._id}>
+                                                {employee.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </Grid>
+                            )}
+
+                            {/* Buttons */}
+                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Button onClick={handleClose} sx={{ mr: 1 }}>Cancel</Button>
+                                <Button variant="contained" onClick={handleSubmit}>
+                                    Submit
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </LocalizationProvider>
-
-                    {/* Step 4: Select Time Zone */}
-                    <Select
-                        fullWidth
-                        name="timeZone"
-                        value={shiftData.timeZone}
-                        onChange={handleChange}
-                        displayEmpty
-                        sx={{ mt: 2 }}
-                    >
-                        <MenuItem value="" disabled>Select Time Zone</MenuItem>
-                        <MenuItem value="Asia/Kolkata">Asia/Kolkata (IST)</MenuItem>
-                        <MenuItem value="America/New_York">America/New_York (EST)</MenuItem>
-                        <MenuItem value="Europe/London">Europe/London (GMT)</MenuItem>
-                    </Select>
-
-                    {/* Step 5: Fetch Available Employees */}
-                    <Button
-                        variant="outlined"
-                        fullWidth
-                        onClick={fetchAvailableEmployees}
-                        disabled={!shiftData.date || !shiftData.startTime || !shiftData.endTime || !shiftData.timeZone || isFetching}
-                        sx={{ mt: 2 }}
-                    >
-                        {isFetching ? "Fetching..." : "Get Available Employees"}
-                    </Button>
-
-                    {/* Step 6: Select Employee */}
-                    {availableEmployees.length > 0 ? (
-                        <Select
-                            fullWidth
-                            name="assignedEmployee"
-                            value={shiftData.assignedEmployee}
-                            onChange={handleChange}
-                            displayEmpty
-                            sx={{ mt: 2 }}
-                        >
-                            <MenuItem value="" disabled>Select an Employee</MenuItem>
-                            {availableEmployees.map((employee) => (
-                                <MenuItem key={employee._id} value={employee._id}>
-                                    {employee.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    ) : (
-                        <Typography variant="body2" textAlign="center" sx={{ mt: 2, color: "red" }}>{availableEmployees.message}</Typography>
-                    )}
-
-                    {/* Buttons */}
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                        <Button onClick={handleClose} sx={{ mr: 1 }}>Cancel</Button>
-                        <Button variant="contained" onClick={handleSubmit}>
-                            Submit
-                        </Button>
-                    </Box>
                 </Box>
             </Modal>
         </>

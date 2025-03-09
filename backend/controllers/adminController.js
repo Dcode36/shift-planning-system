@@ -11,9 +11,6 @@ export const createShift = async (req, res) => {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        if (startTime >= endTime) {
-            return res.status(400).json({ message: 'Start time must be before end time' });
-        }
 
         const newShift = new Shift({ assignedEmployee, date, startTime, endTime, timeZone });
         await newShift.save();
