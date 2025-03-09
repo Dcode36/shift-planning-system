@@ -36,6 +36,7 @@ import EventBusyIcon from '@mui/icons-material/EventBusy';
 import Close from '@mui/icons-material/Close';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import moment from "moment-timezone";
+import { set } from 'date-fns';
 const EmployeeDashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -617,7 +618,7 @@ const EmployeeDashboard = () => {
         };
 
         const weekDates = getCurrentWeekDates();
-
+        const [isLoading, setIsLoading] = useState(true);
         const fetchAvailability = async () => {
             try {
                 const token = localStorage.getItem("token");
@@ -629,6 +630,7 @@ const EmployeeDashboard = () => {
                 });
 
                 setEmployeesAvailability(response.data);
+                setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching availability data:", error);
             }
@@ -703,7 +705,7 @@ const EmployeeDashboard = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {Array.isArray(employeesAvailability) ? (
+                            {Array.isArray(employeesAvailability) && !isLoading ? (
                                 employeesAvailability.map((employee, index) => {
                                     const weeklyAvailability = getAvailabilityByDay(employee);
 
@@ -760,7 +762,15 @@ const EmployeeDashboard = () => {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={8} align="center">
-                                        No availability data found
+                                        {
+                                            isLoading ? (
+                                                <CircularProgress />
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    No availability data found
+                                                </Typography>
+                                            )
+                                        }
                                     </TableCell>
                                 </TableRow>
                             )}
