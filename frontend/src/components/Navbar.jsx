@@ -4,7 +4,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
   Typography,
   Box,
@@ -34,13 +34,14 @@ const Navbar = () => {
       <div className="container d-flex justify-content-between align-items-center my-3">
         <div className="logo fw-semibold fs-5 d-flex align-items-center"><CalendarMonthIcon /> Shift Planning System</div>
 
-        <div className="nav">
+        <div className="nav d-flex align-items-center " sx={{cursor:'pointer'}} onClick={handleClick}>
           <Avatar
             sx={{ width: 28, height: 28, bgcolor: 'black', cursor: 'pointer' }}
-            onClick={handleClick}
+
           >
             {user?.name[0]}
           </Avatar>
+          <MoreVertIcon sx={{cursor:'pointer'}} />
         </div>
       </div>
       <hr />

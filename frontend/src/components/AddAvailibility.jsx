@@ -10,6 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckIcon from '@mui/icons-material/Check';
+import { toast } from 'react-toastify';
 
 const AddAvailability = () => {
     const [open, setOpen] = useState(false);
@@ -32,7 +33,7 @@ const AddAvailability = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setShiftData({ ...shiftData, [name]: value });
-        
+
         // Clear error for this field
         if (errors[name]) {
             setErrors({ ...errors, [name]: null });
@@ -40,31 +41,39 @@ const AddAvailability = () => {
     };
 
     const validateForm = () => {
-        const newErrors = {};
-        
-        if (!shiftData.date) newErrors.date = "Date is required";
-        if (!shiftData.startTime) newErrors.startTime = "Start time is required";
-        if (!shiftData.endTime) newErrors.endTime = "End time is required";
-        
-        // Check if end time is after start time
+        let error = ""; // Use let so we can modify the error variable
+
+        if (!shiftData.date) error = "Date is required";
+        else if (!shiftData.startTime) error = "Start time is required";
+        else if (!shiftData.endTime) error = "End time is required";
+
+        // If start time and end time are available, proceed with validation
         if (shiftData.startTime && shiftData.endTime) {
-            const start = new Date(`${shiftData.date} ${shiftData.startTime}`);
-            const end = new Date(`${shiftData.date} ${shiftData.endTime}`);
-            
-            if (end <= start) {
-                newErrors.endTime = "End time must be after start time";
+            // Convert start time and end time to Date objects for comparison
+            const start = new Date(`1970-01-01T${shiftData.startTime}`);
+            const end = new Date(`1970-01-01T${shiftData.endTime}`);
+
+            // Check if end time is after start time
+            if (start >= end) {
+                error = "End time must be after start time";
+            }
+
+            // Check if the shift duration is more than 4 hours
+            const duration = (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
+            if (duration <= 4) {
+                error = "Shift must be more than 4 hours";
             }
         }
-        
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+
+        return error;
     };
+
 
     const handleTimeChange = (name, time) => {
         if (!time) return;
         const formattedTime = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
         setShiftData((prev) => ({ ...prev, [name]: formattedTime }));
-        
+
         // Clear error for this field
         if (errors[name]) {
             setErrors({ ...errors, [name]: null });
@@ -72,11 +81,13 @@ const AddAvailability = () => {
     };
 
     const handleSubmit = async () => {
-        
+
         try {
-            if (!shiftData.date || !shiftData.startTime || !shiftData.endTime ) {
-                return alert("Please fill all fields before submitting.");
+            if (!shiftData.date || !shiftData.startTime || !shiftData.endTime) {
+                return toast.error("Please fill all fields before submitting.");
             }
+            
+            toast.error(validateForm() || "ERROR: Please Check your selected date and time. Minimum 4 hours required for availability.");
             const token = localStorage.getItem('token');
 
             const res = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/employee/create-availability`, shiftData, {
@@ -95,9 +106,9 @@ const AddAvailability = () => {
 
     return (
         <>
-            <Button 
-                variant="contained" 
-                startIcon={<AddIcon />} 
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
                 onClick={handleOpen}
                 sx={{
                     backgroundColor: 'primary.main',
@@ -111,9 +122,9 @@ const AddAvailability = () => {
                 Add New Availability
             </Button>
 
-            <Modal 
-                open={open} 
-                onClose={handleClose} 
+            <Modal
+                open={open}
+                onClose={handleClose}
                 aria-labelledby="add-new-availability"
                 sx={{ backdropFilter: 'blur(2px)' }}
             >
@@ -132,9 +143,9 @@ const AddAvailability = () => {
                     }}
                 >
                     {/* Header */}
-                    <Box sx={{ 
-                        bgcolor: 'primary.main', 
-                        p: 2, 
+                    <Box sx={{
+                        bgcolor: 'primary.main',
+                        p: 2,
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -143,8 +154,8 @@ const AddAvailability = () => {
                         <Typography id="add-new-availability" variant="h6" component="h2" sx={{ fontWeight: 500 }}>
                             Add Availability
                         </Typography>
-                        <Button 
-                            onClick={handleClose} 
+                        <Button
+                            onClick={handleClose}
                             sx={{ minWidth: 'auto', p: 0.5, color: 'white' }}
                         >
                             <CloseIcon />
@@ -160,10 +171,10 @@ const AddAvailability = () => {
                                     Date <Typography component="span" color="error">*</Typography>
                                 </Typography>
                                 <Box sx={{ position: 'relative' }}>
-                                    <CalendarTodayIcon sx={{ 
-                                        position: 'absolute', 
-                                        left: 10, 
-                                        top: '50%', 
+                                    <CalendarTodayIcon sx={{
+                                        position: 'absolute',
+                                        left: 10,
+                                        top: '50%',
                                         transform: 'translateY(-50%)',
                                         color: 'text.secondary',
                                         fontSize: 20
@@ -198,9 +209,9 @@ const AddAvailability = () => {
                                             value={shiftData.startTime ? new Date(`${shiftData.date || '2023-01-01'} ${shiftData.startTime}`) : null}
                                             onChange={(time) => handleTimeChange('startTime', time)}
                                             renderInput={(params) => (
-                                                <TextField 
-                                                    {...params} 
-                                                    fullWidth 
+                                                <TextField
+                                                    {...params}
+                                                    fullWidth
                                                     size="small"
                                                     error={Boolean(errors.startTime)}
                                                     helperText={errors.startTime}
@@ -224,9 +235,9 @@ const AddAvailability = () => {
                                             value={shiftData.endTime ? new Date(`${shiftData.date || '2023-01-01'} ${shiftData.endTime}`) : null}
                                             onChange={(time) => handleTimeChange('endTime', time)}
                                             renderInput={(params) => (
-                                                <TextField 
-                                                    {...params} 
-                                                    fullWidth 
+                                                <TextField
+                                                    {...params}
+                                                    fullWidth
                                                     size="small"
                                                     error={Boolean(errors.endTime)}
                                                     helperText={errors.endTime}
@@ -243,13 +254,13 @@ const AddAvailability = () => {
                         </LocalizationProvider>
 
                         {/* Timezone Info */}
-                        <Box sx={{ 
+                        <Box sx={{
                             mt: 2,
                             mb: 3,
-                            p: 1.5, 
-                            bgcolor: 'primary.lighter', 
-                            borderRadius: 1, 
-                            display: 'flex', 
+                            p: 1.5,
+                            bgcolor: 'primary.lighter',
+                            borderRadius: 1,
+                            display: 'flex',
                             alignItems: 'flex-start'
                         }}>
                             <InfoIcon sx={{ mr: 1, fontSize: 20, color: 'primary.main' }} />
@@ -260,15 +271,15 @@ const AddAvailability = () => {
 
                         {/* Buttons */}
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 3 }}>
-                            <Button 
+                            <Button
                                 onClick={handleClose}
                                 variant="outlined"
                                 sx={{ textTransform: 'none' }}
                             >
                                 Cancel
                             </Button>
-                            <Button 
-                                variant="contained" 
+                            <Button
+                                variant="contained"
                                 onClick={handleSubmit}
                                 startIcon={<CheckIcon />}
                                 sx={{ textTransform: 'none', fontWeight: 500 }}

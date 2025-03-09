@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import {
     Box,
     Typography,
@@ -80,9 +81,10 @@ const AdminDashboard = () => {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             setShifts(data);
+            toast.success('Shifts fetched successfully');
         } catch (error) {
             console.error(error);
-        } 
+        }
     }
 
     useEffect(() => {
@@ -100,6 +102,7 @@ const AdminDashboard = () => {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             setEmployeesAvailability(data);
+
         } catch (error) {
             console.error(error);
         }
@@ -119,6 +122,7 @@ const AdminDashboard = () => {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             fetchShifts();
+            toast.success('Shift deleted successfully');
         } catch (error) {
             console.error('Error deleting shift:', error);
         }

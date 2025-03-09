@@ -7,7 +7,8 @@ import axios from 'axios';
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-
+import CloseIcon from '@mui/icons-material/Close';
+import { toast } from 'react-toastify';
 const AddNewShiftModal = () => {
     const [open, setOpen] = useState(false);
     const user = JSON.parse(localStorage.getItem('user'));
@@ -34,7 +35,7 @@ const AddNewShiftModal = () => {
     };
 
     const handleTimeChange = (name, time) => {
-        if (!time) return;
+        if (!time) { return };
         const formattedTime = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
         setShiftData((prev) => ({ ...prev, [name]: formattedTime }));
     };
@@ -55,6 +56,7 @@ const AddNewShiftModal = () => {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             setAvailableEmployees(data);
+            toast.success("Available Employees Fetched Successfully");
         } catch (error) {
             console.error("Error fetching employees:", error);
         }
@@ -65,6 +67,7 @@ const AddNewShiftModal = () => {
             if (!shiftData.date || !shiftData.startTime || !shiftData.endTime) {
                 return alert("Please fill all fields before submitting.");
             }
+
             const token = localStorage.getItem('token');
 
             const res = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/admin/create-shift`, shiftData, {
@@ -72,11 +75,14 @@ const AddNewShiftModal = () => {
             });
 
             if (res.status === 201) {
-                alert("Shift created successfully");
+                toast.success("Shift created successfully! Page Will Automatically Refresh in 5 seconds");
                 handleClose();
-                window.location.reload();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000);
             }
         } catch (error) {
+            toast.error(error.response?.data?.message || "An error occurred. Please try again.");
             console.error("Error creating shift:", error);
         }
     };
@@ -97,17 +103,34 @@ const AddNewShiftModal = () => {
                         width: 450,
                         bgcolor: 'background.paper',
                         boxShadow: 24,
-                        p: 4,
+                        // p: 4,
                         borderRadius: 2,
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        overflow: 'hidden',
                     }}
                 >
-                    <Typography variant="h5" fontWeight="bold" gutterBottom>
-                        Add New Shift
-                    </Typography>
+                    <Box sx={{
+                        bgcolor: 'primary.main',
+                        p: 2,
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+
+                    }}>
+                        <Typography id="add-new-availability" variant="h6" component="h2" sx={{ fontWeight: 500 }}>
+                            Add Availability
+                        </Typography>
+                        <Button
+                            onClick={handleClose}
+                            sx={{ minWidth: 'auto', p: 0.5, color: 'white' }}
+                        >
+                            <CloseIcon />
+                        </Button>
+                    </Box>
 
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <Grid container spacing={2}>
+                        <Grid container spacing={2} sx={{ p: 4 }}>
                             {/* Date Picker */}
                             <Grid item xs={12}>
                                 <TextField

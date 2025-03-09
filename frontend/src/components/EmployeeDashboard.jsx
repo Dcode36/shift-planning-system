@@ -37,6 +37,7 @@ import Close from '@mui/icons-material/Close';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import moment from "moment-timezone";
 import { set } from 'date-fns';
+import { toast } from 'react-toastify';
 const EmployeeDashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -173,6 +174,7 @@ const EmployeeDashboard = () => {
                 setShifts(data);
                 setLoading(false);
             } catch (error) {
+                toast.error("Error fetching shifts");
                 console.error("Error fetching shifts:", error);
                 setLoading(false);
             }
@@ -218,6 +220,7 @@ const EmployeeDashboard = () => {
 
                 setAvailableEmployees(data);
             } catch (error) {
+                toast.error("Error fetching available employees");
                 console.error("Error fetching available employees:", error);
             }
         };
@@ -241,7 +244,9 @@ const EmployeeDashboard = () => {
 
                 fetchShifts();
                 handleClose();
+                toast.success("Employee assigned successfully");
             } catch (error) {
+                toast.error("Error assigning employee");
                 console.error("Error assigning employee:", error);
             }
         };
@@ -254,25 +259,6 @@ const EmployeeDashboard = () => {
             } catch (error) {
                 console.error("Error formatting date:", error);
                 return dateString;
-            }
-        };
-
-        // Format time to display in 12-hour format with am/pm
-        const formatTime = (timeString) => {
-            try {
-                // Check if timeString is already in 12-hour format (e.g., "2:30 PM")
-                if (timeString.includes('AM') || timeString.includes('PM')) {
-                    return timeString;
-                }
-
-                // If timeString is in 24-hour format (e.g., "14:30")
-                let [hours, minutes] = timeString.split(':').map(Number);
-                const period = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12 || 12; // Convert to 12-hour format
-                return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
-            } catch (error) {
-                console.error("Error formatting time:", error);
-                return timeString;
             }
         };
 

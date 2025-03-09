@@ -7,23 +7,30 @@ import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import NotFoundPage from './components/NotFoundPage';
+import { ToastContainer } from 'react-toastify';
 const App = () => {
   return (
-    <Routes>
-      <Route path='/register' element={<Register />} />
-      <Route path='/login' element={<Login />} />
-      <Route path='*' element={<NotFoundPage />} />
+    <>
+      <ToastContainer />
 
-      <Route element={<PrivateRoute allowedRoles={['admin', 'employee']} />}>
-        <Route path='/' element={<Dashboard />} />
-      </Route>
-      <Route element={<PrivateRoute allowedRoles={['admin']} />}>
-        <Route path='/admin' element={<AdminDashboard />} />
-      </Route>
-      <Route element={<PrivateRoute allowedRoles={['employee']} />}>
-        <Route path='/employee' element={<EmployeeDashboard />} />
-      </Route>
-    </Routes>
+      <Routes>
+        <Route path='/register' element={<Register />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='*' element={<NotFoundPage />} />
+
+        <Route element={<PrivateRoute allowedRoles={['admin', 'employee']} />}>
+          <Route path='/' element={<Dashboard />} />
+        </Route>
+        <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+          <Route path='/admin' element={<AdminDashboard />} />
+        </Route>
+        <Route element={<PrivateRoute allowedRoles={['employee']} />}>
+          <Route path='/employee' element={<EmployeeDashboard />} />
+        </Route>
+      </Routes>
+
+    </>
+
   );
 };
 
