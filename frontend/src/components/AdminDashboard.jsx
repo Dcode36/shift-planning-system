@@ -75,13 +75,13 @@ const AdminDashboard = () => {
             if (!token) {
                 navigate('/login');
             }
-            const { data } = await axios.get(`http://localhost:4000/api/admin/all-shifts`, {
+            const { data } = await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/admin/all-shifts`, {
                 params: { adminTimeZone: user.timeZone },
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             setShifts(data);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } 
     }
 
@@ -96,12 +96,12 @@ const AdminDashboard = () => {
             if (!token) {
                 navigate('/login');
             }
-            const { data } = await axios.get(`http://localhost:4000/api/admin/get-all-availabilities`, {
+            const { data } = await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/admin/get-all-availabilities`, {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
             setEmployeesAvailability(data);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -110,7 +110,18 @@ const AdminDashboard = () => {
     }, [])
 
     const handleDelete = async (shift) => {
-        alert("Delete shift");
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/login');
+            }
+            await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/admin/delete-shift/${shift._id}`, {
+                headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
+            });
+            fetchShifts();
+        } catch (error) {
+            console.error('Error deleting shift:', error);
+        }
     }
 
     const CustomTab = ({ name, label, isActive, icon }) => (
@@ -181,7 +192,7 @@ const AdminDashboard = () => {
                     return;
                 }
                 const { data } = await axios.get(
-                    `http://localhost:4000/api/employee/get-available-employees`,
+                    `${process.env.REACT_APP_SERVER_URL}/api/employee/get-available-employees`,
                     {
                         params: { date, startTime, endTime, timeZone: originalTimeZone },
                         headers: { Authorization: `${token}`, "Content-Type": "application/json" }
@@ -202,7 +213,7 @@ const AdminDashboard = () => {
                     return;
                 }
                 await axios.put(
-                    `http://localhost:4000/api/admin/update-shift/${selectedShift._id}`,
+                    `${process.env.REACT_APP_SERVER_URL}/api/admin/update-shift/${selectedShift._id}`,
                     { assignedEmployee: selectedEmployee },
                     { headers: { Authorization: `${token}`, "Content-Type": "application/json" } }
                 );

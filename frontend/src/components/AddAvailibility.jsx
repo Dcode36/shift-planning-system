@@ -79,7 +79,7 @@ const AddAvailability = () => {
             }
             const token = localStorage.getItem('token');
 
-            const res = await axios.post(`http://localhost:4000/api/employee/create-availability`, shiftData, {
+            const res = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/employee/create-availability`, shiftData, {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
 

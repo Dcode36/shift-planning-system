@@ -43,7 +43,6 @@ const EmployeeDashboard = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const [shifts, setShifts] = useState([]);
     const [employeesAvailability, setEmployeesAvailability] = useState([]);
-    console.log(user)
     // Set active tab based on URL when component mounts
     useEffect(() => {
         // Check if path includes "availability"
@@ -58,11 +57,7 @@ const EmployeeDashboard = () => {
         setActiveTab(tab);
         navigate(`/employee?tab=${tab}`);
     };
-    const convertTimeToUserTimezone = (time, date, adminTimezone, userTimezone) => {
-        return moment.tz(`${date} ${time}`, "YYYY-MM-DD hh:mm A", adminTimezone)
-            .tz(userTimezone)
-            .format("hh:mm A");
-    };
+
 
     const fetchShifts = async () => {
         try {
@@ -74,14 +69,13 @@ const EmployeeDashboard = () => {
                 return;
             }
 
-            const response = await axios.get(`http://localhost:4000/api/employee/assigned-shifts/${user._id}`, {
+            const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/employee/assigned-shifts/${user._id}`, {
                 headers: {
                     Authorization: `${token}`,
                     'Content-Type': 'application/json'
                 }
             });
 
-            console.log("shifts", response.data);
         } catch (error) {
             console.error("Error fetching shifts:", error.response?.data || error.message);
         }
@@ -92,23 +86,6 @@ const EmployeeDashboard = () => {
         fetchShifts();
     }, [])
 
-    const fetchAllAvailabilities = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/login');
-            }
-            const { data } = await axios.get(`http://localhost:4000/api/admin/get-all-availabilities`, {
-                headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
-            });
-            setEmployeesAvailability(data);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    useEffect(() => {
-        fetchAllAvailabilities();
-    }, [])
 
 
 
@@ -188,7 +165,7 @@ const EmployeeDashboard = () => {
                 }
 
                 const { data } = await axios.get(
-                    `http://localhost:4000/api/employee/assigned-shifts/${user._id}`,
+                    `${process.env.REACT_APP_SERVER_URL}/api/employee/assigned-shifts/${user._id}`,
                     { headers: { Authorization: `${token}` } }
                 );
 
@@ -231,7 +208,7 @@ const EmployeeDashboard = () => {
                 }
 
                 const { data } = await axios.get(
-                    `http://localhost:4000/api/employee/get-available-employees`,
+                    `${process.env.REACT_APP_SERVER_URL}/api/employee/get-available-employees`,
                     {
                         params: { date, startTime, endTime, timeZone: originalTimeZone },
                         headers: { Authorization: `${token}`, "Content-Type": "application/json" }
@@ -256,7 +233,7 @@ const EmployeeDashboard = () => {
                 }
 
                 await axios.put(
-                    `http://localhost:4000/api/admin/update-shift/${selectedShift._id}`,
+                    `${process.env.REACT_APP_SERVER_URL}/api/admin/update-shift/${selectedShift._id}`,
                     { assignedEmployee: selectedEmployee },
                     { headers: { Authorization: `${token}`, "Content-Type": "application/json" } }
                 );
@@ -480,17 +457,12 @@ const EmployeeDashboard = () => {
                                                 size="small"
                                                 onClick={() => handleInfoOpen(shift)}
                                                 title="View details"
+                                                textAlign="center"
+                                                centerRipple
                                             >
                                                 <InfoOutlinedIcon />
                                             </IconButton>
-                                            <IconButton
-                                                color="error"
-                                                size="small"
-                                                sx={{ ml: 1 }}
-                                                title="Request time off"
-                                            >
-                                                <EventBusyIcon />
-                                            </IconButton>
+
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -649,7 +621,7 @@ const EmployeeDashboard = () => {
         const fetchAvailability = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:4000/api/employee/get-availability", {
+                const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/employee/get-availability`, {
                     headers: {
                         Authorization: `${token}`,
                         "Content-Type": "application/json"
@@ -657,7 +629,6 @@ const EmployeeDashboard = () => {
                 });
 
                 setEmployeesAvailability(response.data);
-                console.log("Response data:", response.data);
             } catch (error) {
                 console.error("Error fetching availability data:", error);
             }
@@ -741,7 +712,7 @@ const EmployeeDashboard = () => {
                                             {/* Employee info cell */}
                                             <TableCell>
                                                 <Typography variant="body2" fontWeight="medium">
-                                                    {employee.employeeId || "Employee " + (index + 1)}
+                                                    {user.name || "Employee " + (index + 1)}
                                                 </Typography>
                                                 <Typography variant="caption" color="text.secondary">
                                                     {employee.timeZone || "Default timezone"}

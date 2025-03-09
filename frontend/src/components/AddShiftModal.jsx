@@ -50,7 +50,7 @@ const AddNewShiftModal = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const { data } = await axios.get(`http://localhost:4000/api/employee/get-available-employees`, {
+            const { data } = await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/employee/get-available-employees`, {
                 params: shiftData,
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
@@ -67,7 +67,7 @@ const AddNewShiftModal = () => {
             }
             const token = localStorage.getItem('token');
 
-            const res = await axios.post(`http://localhost:4000/api/admin/create-shift`, shiftData, {
+            const res = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/admin/create-shift`, shiftData, {
                 headers: { Authorization: `${token}`, 'Content-Type': 'application/json' }
             });
 
