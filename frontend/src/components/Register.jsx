@@ -18,7 +18,9 @@ const Register = () => {
     const handleRegister = async () => {
         try {
             await register(userData);
+            
             navigate('/login'); // Redirect user after successful registration
+            window.location.reload();
         } catch (error) {
             console.error("Registration failed", error);
         }
