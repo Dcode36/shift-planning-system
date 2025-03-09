@@ -15,7 +15,7 @@ const NotFoundPage = () => {
                 Oops! Page Not Found
             </Typography>
             <Typography variant="body1" color="textSecondary" sx={{ mt: 1, mb: 3 }}>
-                The page you're looking for doesn't exist or has been moved. <Link to="/">Go back</Link> to the homepage.
+                Either The page you're looking for doesn't exist or you dont have access to that Page. <Link to="/">Go back</Link> to the homepage.
             </Typography>
         </Container>
     );
