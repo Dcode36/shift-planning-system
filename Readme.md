@@ -42,9 +42,17 @@ The Shift Planning System is a web-based application designed to streamline the 
 - **🔔 Notification System**: Real-time alerts for shift changes and updates
 - **🔒 Secure Dashboards**: Protected routes for both admin and employee dashboards
 
+## Tech Stack
+- **MongoDB**: NoSQL database for storing and managing data.
+- **Express.js**: Web framework for Node.js used to build the back-end API.
+- **React**: Frontend JavaScript library for building dynamic, single-page applications.
+- **Node.js**: JavaScript runtime for building server-side applications.
+- **Material UI**: React component library providing pre-designed, customizable UI components.
+- **Bootstrap**: Frontend framework for building responsive web applications.
+
 ## 🏗 System Architecture
 
-We have designed a scalable and robust system architecture for the Shift Planning System.
+I have designed a scalable and robust system architecture for the Shift Planning System.
 
 [View High-Level Design Document](https://app.eraser.io/workspace/VdY74MuVV59uhtxVnUVs?origin=share)
 
@@ -52,7 +60,7 @@ We have designed a scalable and robust system architecture for the Shift Plannin
 
 Explore and test our API endpoints using Postman:
 
-[Postman API Documentation](http://example.com/postman-link)
+[Postman API Documentation](https://dark-station-409921.postman.co/workspace/New-Team-Workspace~9ad4ea78-346b-47c7-ab44-007ddf6b5fee/collection/21417354-f54a69a2-6184-4786-adb6-5fb65aaef347?action=share&creator=21417354)
 
 ## 🚀 Installation Guide
 
