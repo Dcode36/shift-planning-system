@@ -87,7 +87,7 @@ const AddAvailability = () => {
                 return toast.error("Please fill all fields before submitting.");
             }
             
-            toast.error(validateForm() || "ERROR: Please Check your selected date and time. Minimum 4 hours required for availability.");
+            // toast.error(validateForm() || "ERROR: Please Check your selected date and time. Minimum 4 hours required for availability.");
             const token = localStorage.getItem('token');
 
             const res = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/employee/create-availability`, shiftData, {
