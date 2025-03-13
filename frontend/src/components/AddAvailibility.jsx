@@ -86,7 +86,7 @@ const AddAvailability = () => {
             if (!shiftData.date || !shiftData.startTime || !shiftData.endTime) {
                 return toast.error("Please fill all fields before submitting.");
             }
-            
+
             // toast.error(validateForm() || "ERROR: Please Check your selected date and time. Minimum 4 hours required for availability.");
             const token = localStorage.getItem('token');
 
@@ -95,12 +95,15 @@ const AddAvailability = () => {
             });
 
             if (res.status === 201) {
-                alert("Availability added successfully");
+                toast.success("Availability added successfully");
                 handleClose();
                 window.location.reload();
+            } else {
+                toast.success(res.message);
             }
         } catch (error) {
-            console.error("Error creating availability:", error);
+            toast.error(error.response.data.message);
+            console.error("Error creating availability:");
         }
     };
 
