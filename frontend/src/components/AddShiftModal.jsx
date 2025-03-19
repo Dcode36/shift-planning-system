@@ -23,7 +23,7 @@ const AddNewShiftModal = () => {
     const [availableEmployees, setAvailableEmployees] = useState([]);
     const [loading, setLoading] = useState(false);
     const [employeesFetched, setEmployeesFetched] = useState(false);
-
+    const [employeesmessage, setEmployeeMessage] = useState('');
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setShiftData({ date: '', startTime: null, endTime: null, timeZone: user.timeZone, assignedEmployee: '' });
@@ -48,7 +48,7 @@ const AddNewShiftModal = () => {
         if (shiftData.date && shiftData.startTime && shiftData.endTime) {
             fetchAvailableEmployees();
         }
-    }, [shiftData.date, shiftData.startTime, shiftData.endTime]);
+    }, [shiftData.date, shiftData.startTime, shiftData.endTime, employeesmessage]);
 
     const fetchAvailableEmployees = async () => {
         setLoading(true);
@@ -60,6 +60,10 @@ const AddNewShiftModal = () => {
             });
             setAvailableEmployees(data);
             setEmployeesFetched(true);
+
+            if (data?.message) {
+                setEmployeeMessage('No available employees for the selected time slot');
+            }
             // toast.success("Available Employees Fetched Successfully");
         } catch (error) {
             console.error("Error fetching employees:", error);
@@ -218,12 +222,21 @@ const AddNewShiftModal = () => {
                                 </Grid>
                             )}
 
+
+                            <Grid item xs={12}>
+                                <Typography variant="body2" color="red" sx={{ mt: 2 }}>
+                                    {
+                                        employeesmessage
+                                    }
+                                </Typography>
+                            </Grid>
+
                             {/* Buttons */}
                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                                 <Button onClick={handleClose} sx={{ mr: 1 }}>Cancel</Button>
-                                <Button 
-                                    variant="contained" 
-                                    onClick={handleSubmit} 
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSubmit}
                                     disabled={!isSubmitEnabled}
                                 >
                                     Submit
